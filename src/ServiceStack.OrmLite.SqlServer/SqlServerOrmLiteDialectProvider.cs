@@ -13,7 +13,8 @@ namespace ServiceStack.OrmLite.SqlServer
 	{
 		public static SqlServerOrmLiteDialectProvider Instance = new SqlServerOrmLiteDialectProvider();
 
-		private static DateTime timeSpanOffset = new DateTime(1900,01,01);
+		private static readonly DateTime timeSpanOffset = new DateTime(1900,01,01);
+        private const string DateTimeOffsetColumnDefinition = "DATETIMEOFFSET";
 
 		public SqlServerOrmLiteDialectProvider()
 		{
@@ -25,8 +26,13 @@ namespace ServiceStack.OrmLite.SqlServer
 			base.DecimalColumnDefinition = "DECIMAL(38,6)";
 			base.TimeColumnDefinition = "TIME"; //SQLSERVER 2008+
 		    base.BlobColumnDefinition = "VARBINARY(MAX)";
+		    base.SelectIdentitySql = "SELECT SCOPE_IDENTITY()";
 
 			base.InitColumnTypeMap();
+
+            // add support for DateTimeOffset
+            DbTypeMap.Set<DateTimeOffset>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
+            DbTypeMap.Set<DateTimeOffset?>(DbType.DateTimeOffset, DateTimeOffsetColumnDefinition);
 		}
 
         public override string GetQuotedParam(string paramValue)
@@ -137,6 +143,12 @@ namespace ServiceStack.OrmLite.SqlServer
 				const string iso8601Format = "yyyyMMdd HH:mm:ss.fff";
 				return base.GetQuotedValue(dateValue.ToString(iso8601Format,CultureInfo.InvariantCulture) , typeof(string));
 			}
+            if (fieldType == typeof(DateTimeOffset))
+            {
+                var dateValue = (DateTimeOffset)value;
+                const string iso8601Format = "yyyyMMdd HH:mm:ss.fff zzz";
+                return base.GetQuotedValue(dateValue.ToString(iso8601Format, CultureInfo.InvariantCulture), typeof(string));
+            }
 			if (fieldType == typeof(bool))
 			{
 				var boolValue = (bool)value;
@@ -169,12 +181,6 @@ namespace ServiceStack.OrmLite.SqlServer
 		public void EnsureUtc(bool shouldEnsureUtc)
 		{
 		    _ensureUtc = shouldEnsureUtc;
-		}
-
-		public override long GetLastInsertId(IDbCommand dbCmd)
-		{
-			dbCmd.CommandText = "SELECT SCOPE_IDENTITY()";
-			return dbCmd.GetLongScalar();
 		}
 
 		public override SqlExpressionVisitor<T> ExpressionVisitor<T>()

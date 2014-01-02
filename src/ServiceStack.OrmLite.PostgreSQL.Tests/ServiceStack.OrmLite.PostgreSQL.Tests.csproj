@@ -66,9 +66,6 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\GlobalAssemblyInfo.cs">
-      <Link>Properties\GlobalAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="CreatePostgreSQLTablesTests.cs" />
     <Compile Include="EnumTests.cs" />
     <Compile Include="Expressions\AdditiveExpressionsTest.cs" />
@@ -89,6 +86,7 @@
     <Compile Include="NorthwindPerfTests.cs" />
     <Compile Include="OrmLiteBasicPersistenceProviderTests.cs" />
     <Compile Include="OrmLiteCreateTableWithNamigStrategyTests.cs" />
+    <Compile Include="OrmLiteDropTableWithNamingStrategyTests.cs" />
     <Compile Include="OrmLiteExecuteProcedureTests.cs" />
     <Compile Include="OrmLiteInsertTests.cs" />
     <Compile Include="OrmLiteNorthwindTests.cs" />

@@ -1,4 +1,6 @@
 using System;
+using System.Configuration;
+using System.Data;
 using System.IO;
 using System.Configuration;
 using NUnit.Framework;
@@ -15,9 +17,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 		protected string GetFileConnectionString()
 		{
-			// add ormlite-tests.fdb = D:\\ormlite-tests.fdb to your firebird  alias.conf 
-			return ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
-		}
+            return ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
+        }
 
 		protected void CreateNewDatabase()
 		{
@@ -37,5 +38,11 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
 			Console.WriteLine(text);
 		}
-	}
+
+        public IDbConnection OpenDbConnection(string connString = null)
+        {
+            connString = connString ?? ConnectionString;
+            return connString.OpenDbConnection();
+        }
+    }
 }

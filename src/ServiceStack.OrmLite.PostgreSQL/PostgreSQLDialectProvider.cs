@@ -28,6 +28,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             base.StringLengthUnicodeColumnDefinitionFormat = "character varying({0})";
             base.StringLengthNonUnicodeColumnDefinitionFormat = "character varying({0})"; 
 			base.InitColumnTypeMap();
+		    base.SelectIdentitySql = "SELECT LASTVAL()";
 		    this.NamingStrategy = new PostgreSqlNamingStrategy();
 
             DbTypeMap.Set<TimeSpan>(DbType.Time, "Interval");
@@ -137,6 +138,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
 				var integerArray = (int[]) value;
 				return ToArray(integerArray);
 			}
+			if (fieldType.IsArray && typeof(long).IsAssignableFrom(fieldType.GetElementType()))
+			{
+				var longArray = (long[]) value;
+				return ToArray(longArray);
+			}
 
 			return base.GetQuotedValue(value, fieldType);
 		}
@@ -145,18 +151,9 @@ namespace ServiceStack.OrmLite.PostgreSQL
 		{
 			if (value == null || value is DBNull) return null;
 			
-			if(type == typeof(byte[])) { return value; }
+			if (type == typeof(byte[])) { return value; }
 
 			return base.ConvertDbValue(value, type);
-		}
-
-		public override long GetLastInsertId(IDbCommand command)
-		{
-			command.CommandText = "SELECT LASTVAL()";
-			var result = command.ExecuteScalar();
-			if (result is DBNull)
-				return default(long);
-			return Convert.ToInt64(result);
 		}
 		
 		public override SqlExpressionVisitor<T> ExpressionVisitor<T>()
